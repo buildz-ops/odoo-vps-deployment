@@ -356,5 +356,5 @@ If you encounter any issues or have questions, please open an issue in this repo
 ---
 
 **Document Version:** 1.0  
-**Last Updated:** December 2024  
-**Tested Environment:** Ubuntu Server with Docker Compose
+**Last Updated:** 21/12/2025  
+**Tested Environment:** Debian VPS w/ Docker
