@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=YOUR_SECURE_PASSWORD_HERE  # ⚠️ CHANGE THIS
+      - POSTGRES_USER=odoo
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  odoo:
+    image: odoo:latest
+    depends_on:
+      - db
+    # Port 8069 is now internal only - forces all traffic through Nginx/HTTPS
+    expose:
+      - "8069"
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=YOUR_SECURE_PASSWORD_HERE  # ⚠️ Must match POSTGRES_PASSWORD
+    volumes:
+      - odoo-data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons
+    restart: unless-stopped
+
+  nginx-proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80'     # HTTP (redirects to HTTPS)
+      - '443:443'   # HTTPS
+      - '81:81'     # Nginx Admin Dashboard
+    volumes:
+      - ./nginx-data:/data
+      - ./letsencrypt:/etc/letsencrypt
+
+volumes:
+  odoo-db-data:
+  odoo-data:

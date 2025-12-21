@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=YOUR_SECURE_PASSWORD_HERE  # ⚠️ CHANGE THIS
+      - POSTGRES_USER=odoo
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data
+    # No ports exposed - DB remains private within Docker network
+
+  odoo:
+    image: odoo:latest
+    depends_on:
+      - db
+    ports:
+      - "8069:8069"  # Exposed for initial testing only
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=YOUR_SECURE_PASSWORD_HERE  # ⚠️ Must match POSTGRES_PASSWORD
+    volumes:
+      - odoo-data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons
+
+volumes:
+  odoo-db-data:
+  odoo-data:
