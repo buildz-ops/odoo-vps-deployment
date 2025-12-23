@@ -1,25 +1,36 @@
 #!/bin/bash
 
 # Configuration Variables
-ODOO_VERSION="17"
-POSTGRES_VERSION="15"
+ODOO_VERSION="latest"      # CHANGED: Uses the latest stable Odoo version
+POSTGRES_VERSION="16"      # Updated to 16 (better performance for newer Odoo versions)
 DB_USER="odoo"
 DB_PASSWORD="odoo_password"
 DB_NAME="postgres"
 
 # Colors
 GREEN='\033[0;32m'
+RED='\033[0;31m'
 NC='\033[0m'
 
-echo -e "${GREEN}Starting Odoo Deployment Script...${NC}"
+echo -e "${GREEN}Starting Odoo Deployment Script (Latest Version)...${NC}"
 
-# 1. Prompt for Project Name
-read -p "Enter a name for your project (no spaces, e.g., my-odoo): " PROJECT_NAME
+# 1. Prompt for Project Name with Validation
+while true; do
+    read -p "Enter a name for your project (letters/numbers/dashes only, e.g., my-odoo): " PROJECT_NAME
+    
+    # Default if empty
+    if [ -z "$PROJECT_NAME" ]; then
+        PROJECT_NAME="odoo-server"
+        break
+    fi
 
-# Validate input (default to 'odoo-server' if empty)
-if [ -z "$PROJECT_NAME" ]; then
-    PROJECT_NAME="odoo-server"
-fi
+    # Check for invalid characters (spaces or special symbols)
+    if [[ "$PROJECT_NAME" =~ ^[a-zA-Z0-9-]+$ ]]; then
+        break
+    else
+        echo -e "${RED}Error: Project name contains invalid characters. Please use only letters, numbers, and dashes.${NC}"
+    fi
+done
 
 echo -e "${GREEN}Project name set to: $PROJECT_NAME${NC}"
 
@@ -56,11 +67,10 @@ cd ~
 mkdir -p "$PROJECT_NAME"
 cd "$PROJECT_NAME"
 
-# 4. Generate docker-compose.yml with Custom Container Names
+# 4. Generate docker-compose.yml
 echo -e "${GREEN}Generating docker-compose.yml...${NC}"
 
 cat <<EOF > docker-compose.yml
-version: '3.1'
 services:
   web:
     image: odoo:${ODOO_VERSION}
@@ -98,23 +108,23 @@ EOF
 # 5. Create Subdirectories
 mkdir -p config addons
 
-# 6. Start Containers
-echo -e "${GREEN}Starting Odoo and Database containers...${NC}"
+# 6. Start Containers (Using SUDO to fix permission denied error)
+echo -e "${GREEN}Starting Odoo (Latest) and Database containers...${NC}"
 
 if docker compose version &> /dev/null; then
-    docker compose up -d
+    sudo docker compose up -d
 else
-    docker-compose up -d
+    sudo docker-compose up -d
 fi
 
 # 7. Get Local IP
-# This grabs the first private IP address found on the machine
 LOCAL_IP=$(hostname -I | awk '{print $1}')
 
 # Final Status
 echo -e "${GREEN}Deployment Complete!${NC}"
 echo "----------------------------------------------------"
 echo "Project: $PROJECT_NAME"
+echo "Odoo Version:   $ODOO_VERSION"
 echo "Odoo Container: ${PROJECT_NAME}-odoo"
 echo "DB Container:   ${PROJECT_NAME}-db"
 echo ""
