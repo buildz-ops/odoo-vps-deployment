@@ -12,7 +12,7 @@ Complete guide for deploying Odoo with Docker, PostgreSQL, and HTTPS via Nginx P
 
 ```bash
 # Download the script
-wget https://raw.githubusercontent.com/YOUR_USERNAME/odoo-vps-deployment/main/auto-deploy.sh
+wget https://raw.githubusercontent.com/buildz-ops/odoo-vps-deployment/main/auto-deploy.sh
 
 # Make it executable
 chmod +x auto-deploy.sh
