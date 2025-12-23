@@ -3,7 +3,6 @@
 # Configuration Variables
 ODOO_VERSION="17"
 POSTGRES_VERSION="15"
-PROJECT_NAME="odoo-server"
 DB_USER="odoo"
 DB_PASSWORD="odoo_password"
 DB_NAME="postgres"
@@ -14,7 +13,17 @@ NC='\033[0m'
 
 echo -e "${GREEN}Starting Odoo Deployment Script...${NC}"
 
-# 1. Update and Install Dependencies (Docker + Curl)
+# 1. Prompt for Project Name
+read -p "Enter a name for your project (no spaces, e.g., my-odoo): " PROJECT_NAME
+
+# Validate input (default to 'odoo-server' if empty)
+if [ -z "$PROJECT_NAME" ]; then
+    PROJECT_NAME="odoo-server"
+fi
+
+echo -e "${GREEN}Project name set to: $PROJECT_NAME${NC}"
+
+# 2. Update and Install Dependencies
 echo -e "${GREEN}Checking system requirements...${NC}"
 
 sudo apt-get update -qq
@@ -41,13 +50,13 @@ fi
 sudo systemctl start docker
 sudo systemctl enable docker
 
-# 2. Setup Project Directory
+# 3. Setup Project Directory (in User Home)
 echo -e "${GREEN}Setting up project directory at ~/$PROJECT_NAME...${NC}"
 cd ~
 mkdir -p "$PROJECT_NAME"
 cd "$PROJECT_NAME"
 
-# 3. Generate docker-compose.yml
+# 4. Generate docker-compose.yml with Custom Container Names
 echo -e "${GREEN}Generating docker-compose.yml...${NC}"
 
 cat <<EOF > docker-compose.yml
@@ -55,6 +64,7 @@ version: '3.1'
 services:
   web:
     image: odoo:${ODOO_VERSION}
+    container_name: ${PROJECT_NAME}-odoo
     depends_on:
       - db
     ports:
@@ -71,6 +81,7 @@ services:
 
   db:
     image: postgres:${POSTGRES_VERSION}
+    container_name: ${PROJECT_NAME}-db
     environment:
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -84,21 +95,28 @@ volumes:
   odoo-db-data:
 EOF
 
-# 4. Create Subdirectories
+# 5. Create Subdirectories
 mkdir -p config addons
 
-# 5. Start Containers
+# 6. Start Containers
 echo -e "${GREEN}Starting Odoo and Database containers...${NC}"
 
 if docker compose version &> /dev/null; then
-    sudo docker compose up -d
+    docker compose up -d
 else
-    sudo docker-compose up -d
+    docker-compose up -d
 fi
 
-# 6. Final Status
+# 7. Get Local IP
+# This grabs the first private IP address found on the machine
+LOCAL_IP=$(hostname -I | awk '{print $1}')
+
+# Final Status
 echo -e "${GREEN}Deployment Complete!${NC}"
 echo "----------------------------------------------------"
-echo "Odoo is running on port 8069."
-echo "Access it via: http://$(curl -s ifconfig.me):8069"
+echo "Project: $PROJECT_NAME"
+echo "Odoo Container: ${PROJECT_NAME}-odoo"
+echo "DB Container:   ${PROJECT_NAME}-db"
+echo ""
+echo "Access Odoo via: http://${LOCAL_IP}:8069"
 echo "----------------------------------------------------"
