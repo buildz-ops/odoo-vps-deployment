@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration Variables
-ODOO_VERSION="latest"      # CHANGED: Uses the latest stable Odoo version
+ODOO_VERSION="19"      # CHANGED: Uses the latest stable Odoo version
 POSTGRES_VERSION="16"      # Updated to 16 (better performance for newer Odoo versions)
 DB_USER="odoo"
 DB_PASSWORD="odoo_password"
