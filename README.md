@@ -24,7 +24,7 @@ chmod +x auto-deploy.sh
 **What the script does:**
 - ✅ Installs Docker and Docker Compose automatically
 - ✅ Creates project directory structure
-- ✅ Generates docker-compose.yml with Odoo 17 and PostgreSQL 15
+- ✅ Generates docker-compose.yml with Odoo 19 and PostgreSQL 16
 - ✅ Starts containers in detached mode
 - ✅ Displays access URL with your public IP
 
