@@ -74,7 +74,7 @@ docker compose down && docker compose up -d
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/odoo-vps-deployment.git
+git clone https://github.com/buildz-ops/odoo-vps-deployment.git
 cd odoo-vps-deployment
 
 # Copy the docker-compose file
